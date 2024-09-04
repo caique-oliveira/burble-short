@@ -1,10 +1,11 @@
-// src/Visualizer.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
 import './Visualizer.css'; // Importando o CSS
+import ElementList from './elementList.tsx'; // Importando o novo componente
 
-// Função de Bubble Sort
+const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta', 'lime', 'pink'];
+
 const bubbleSort = async (array: number[], updateArray: (array: number[]) => void, delay: number) => {
   const n = array.length;
   for (let i = 0; i < n - 1; i++) {
@@ -20,35 +21,57 @@ const bubbleSort = async (array: number[], updateArray: (array: number[]) => voi
 
 const Visualizer: React.FC = () => {
   const [data, setData] = useState<number[]>([]);
-  const [delay, setDelay] = useState(500);
-  const [size, setSize] = useState(1000);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [delay, setDelay] = useState<number>(500);
+  const [size, setSize] = useState<number>(1000);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const svgRef = useRef<SVGSVGElement>(null);
+  const elementsRef = useRef<HTMLDivElement[]>([]);
+
+  const paintElements = async () => {
+    setIsPlaying(true);
+    for (let i = 0; i < elementsRef.current.length; i++) {
+      const element = elementsRef.current[i];
+      if (element) {
+        element.style.backgroundColor = colors[i % colors.length]; // Atribui a cor do array
+        await new Promise(res => setTimeout(res, 500)); // Aguarda 500ms entre cada alteração
+      }
+    }
+    setIsPlaying(false);
+  };
 
   useEffect(() => {
     const updateChart = () => {
       if (svgRef.current) {
         const svg = d3.select(svgRef.current);
         svg.selectAll("*").remove();
+        
         const width = svgRef.current.clientWidth;
         const height = svgRef.current.clientHeight;
         const barWidth = width / data.length;
+  
+        console.log('Bar width:', barWidth);
+  
         const yScale = d3.scaleLinear()
           .domain([0, d3.max(data) || 0])
           .range([height, 0]);
-
+  
+        console.log('Y scale domain:', [0, d3.max(data) || 0]);
+        console.log('Y scale range:', [height, 0]);
+  
         svg.selectAll("rect")
           .data(data)
           .enter()
           .append("rect")
-          .attr("x", (_d: unknown, i: number) => i * barWidth)
+          .attr("x", (_d: number, i: number) => i * barWidth)
           .attr("y", (d: number) => yScale(d))
-          .attr("width", barWidth)
+          .attr("width", barWidth - 1)
           .attr("height", (d: number) => height - yScale(d))
           .attr("fill", "steelblue");
+  
+        console.log('Rectangles drawn');
       }
     };
-
+  
     updateChart();
   }, [data]);
 
@@ -56,6 +79,7 @@ const Visualizer: React.FC = () => {
     try {
       const response = await axios.get(`/api/api/v1.0/random?min=0&max=1000&count=${size}`);
       setData(response.data);
+      console.log(response.data,'response data')
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -63,9 +87,27 @@ const Visualizer: React.FC = () => {
 
   const startSorting = () => {
     if (isPlaying || data.length === 0) return;
+  
     setIsPlaying(true);
-    bubbleSort([...data], setData, delay).then(() => setIsPlaying(false));
+    
+    // Verifique o estado de isPlaying após um breve atraso
+    setTimeout(() => {
+      console.log('Estado após setIsPlaying:', isPlaying);
+    }, 0);
+  
+    bubbleSort([...data], setData, delay).finally(() => {
+      setIsPlaying(false);
+    });
+    console.log([...data], 'data aqui')
+
+    if (isPlaying) return;
+    paintElements();
   };
+  useEffect(() => {
+    if (isPlaying) {
+      console.log('Ordenação em andamento...');
+    }
+  }, [isPlaying]);
 
   const reset = async () => {
     if (isPlaying) return;
@@ -105,7 +147,7 @@ const Visualizer: React.FC = () => {
         <button onClick={reset} disabled={isPlaying}>Reset</button>
       </div>
       <div className="containerFil">
-      <svg ref={svgRef} width="100%" height="500"></svg>
+        <ElementList elementsRef={elementsRef} />
       </div>
     </div>
   );
