@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
+import './Visualizer.css'; // Importando o CSS
 
 // Função de Bubble Sort
 const bubbleSort = async (array: number[], updateArray: (array: number[]) => void, delay: number) => {
@@ -61,13 +62,13 @@ const Visualizer: React.FC = () => {
   };
 
   const startSorting = () => {
-    if (isPlaying || data.length === 0) return; // Não iniciar se já estiver tocando ou se não há dados
+    if (isPlaying || data.length === 0) return;
     setIsPlaying(true);
     bubbleSort([...data], setData, delay).then(() => setIsPlaying(false));
   };
 
   const reset = async () => {
-    if (isPlaying) return; // Não permitir resetar enquanto estiver ordenando
+    if (isPlaying) return;
     await fetchData();
   };
 
@@ -76,8 +77,9 @@ const Visualizer: React.FC = () => {
   }, [size]);
 
   return (
-    <div>
-      <div>
+    <div className="container">
+      <div className="controls">
+        <label className="range-label">Delay: {delay}ms</label>
         <input
           type="range"
           min="0"
@@ -85,10 +87,9 @@ const Visualizer: React.FC = () => {
           value={delay}
           onChange={(e) => setDelay(Number(e.target.value))}
           disabled={isPlaying}
+          className="range-input"
         />
-        <span>Delay: {delay}ms</span>
-      </div>
-      <div>
+        <label className="range-label">Size: {size}</label>
         <input
           type="range"
           min="100"
@@ -96,12 +97,16 @@ const Visualizer: React.FC = () => {
           value={size}
           onChange={(e) => setSize(Number(e.target.value))}
           disabled={isPlaying}
+          className="range-input"
         />
-        <span>Size: {size}</span>
       </div>
-      <button onClick={startSorting} disabled={isPlaying}>Start</button>
-      <button onClick={reset} disabled={isPlaying}>Reset</button>
-      <svg ref={svgRef} width="100%" height="400"></svg>
+      <div className="button-container">
+        <button onClick={startSorting} disabled={isPlaying}>Start</button>
+        <button onClick={reset} disabled={isPlaying}>Reset</button>
+      </div>
+      <div className="containerFil">
+      <svg ref={svgRef} width="100%" height="500"></svg>
+      </div>
     </div>
   );
 };
