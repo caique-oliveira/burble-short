@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
 import './Visualizer.css'; // Importando o CSS
-import ElementList from './elementList.tsx'; // Importando o novo componente
+import ElementList from './elementList'; // Importando o novo componente
 
 const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta', 'lime', 'pink'];
 
@@ -48,16 +48,16 @@ const Visualizer: React.FC = () => {
         const width = svgRef.current.clientWidth;
         const height = svgRef.current.clientHeight;
         const barWidth = width / data.length;
-  
+
         console.log('Bar width:', barWidth);
-  
+
         const yScale = d3.scaleLinear()
           .domain([0, d3.max(data) || 0])
           .range([height, 0]);
-  
+
         console.log('Y scale domain:', [0, d3.max(data) || 0]);
         console.log('Y scale range:', [height, 0]);
-  
+
         svg.selectAll("rect")
           .data(data)
           .enter()
@@ -67,11 +67,11 @@ const Visualizer: React.FC = () => {
           .attr("width", barWidth - 1)
           .attr("height", (d: number) => height - yScale(d))
           .attr("fill", "steelblue");
-  
+
         console.log('Rectangles drawn');
       }
     };
-  
+
     updateChart();
   }, [data]);
 
@@ -79,7 +79,7 @@ const Visualizer: React.FC = () => {
     try {
       const response = await axios.get(`/api/api/v1.0/random?min=0&max=1000&count=${size}`);
       setData(response.data);
-      console.log(response.data,'response data')
+      console.log(response.data, 'response data');
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -90,7 +90,6 @@ const Visualizer: React.FC = () => {
   
     setIsPlaying(true);
     
-    // Verifique o estado de isPlaying após um breve atraso
     setTimeout(() => {
       console.log('Estado após setIsPlaying:', isPlaying);
     }, 0);
@@ -98,11 +97,12 @@ const Visualizer: React.FC = () => {
     bubbleSort([...data], setData, delay).finally(() => {
       setIsPlaying(false);
     });
-    console.log([...data], 'data aqui')
+    console.log([...data], 'data aqui');
 
     if (isPlaying) return;
     paintElements();
   };
+
   useEffect(() => {
     if (isPlaying) {
       console.log('Ordenação em andamento...');
@@ -111,43 +111,71 @@ const Visualizer: React.FC = () => {
 
   const reset = async () => {
     if (isPlaying) return;
+
+    // Resetar o valor do tamanho para o valor inicial
+    setSize(1000); // Valor inicial desejado
+
+    // Resetar os dados
     await fetchData();
+
+    // Limpar as referências dos elementos e reaplicar a cor inicial
+    requestAnimationFrame(() => {
+      if (elementsRef.current) {
+        elementsRef.current.forEach(element => {
+          if (element) {
+            element.style.backgroundColor = 'cornflowerblue'; // Cor inicial
+          }
+        });
+      }
+    });
   };
 
   useEffect(() => {
     fetchData();
   }, [size]);
 
+  const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSize = Math.max(600, Number(e.target.value));
+    setSize(newSize);
+  };
+
   return (
     <div className="container">
       <div className="controls">
-        <label className="range-label">Delay: {delay}ms</label>
-        <input
-          type="range"
-          min="0"
-          max="1000"
-          value={delay}
-          onChange={(e) => setDelay(Number(e.target.value))}
-          disabled={isPlaying}
-          className="range-input"
-        />
-        <label className="range-label">Size: {size}</label>
-        <input
-          type="range"
-          min="100"
-          max="10000"
-          value={size}
-          onChange={(e) => setSize(Number(e.target.value))}
-          disabled={isPlaying}
-          className="range-input"
-        />
+        <div className="range-container">
+          <label className="range-label">Delay: {delay}ms</label>
+          <input
+            type="range"
+            min="0"
+            max="1000"
+            value={delay}
+            onChange={(e) => setDelay(Number(e.target.value))}
+            disabled={isPlaying}
+            className="range-input"
+          />
+          <span className="range-value">{delay} ms</span>
+        </div>
+        <div className="range-container">
+          <label className="range-label">Size: {size}</label>
+          <input
+            type="range"
+            min="600" // Define o valor mínimo para o range
+            max="10000"
+            step="100"
+            value={size}
+            onChange={handleSizeChange} // Use o manipulador de eventos atualizado
+            disabled={isPlaying}
+            className="range-input"
+          />
+          <span className="range-value">{size}</span>
+        </div>
       </div>
       <div className="button-container">
         <button onClick={startSorting} disabled={isPlaying}>Start</button>
         <button onClick={reset} disabled={isPlaying}>Reset</button>
       </div>
       <div className="containerFil">
-        <ElementList elementsRef={elementsRef} />
+        <ElementList elementsRef={elementsRef} size={size} />
       </div>
     </div>
   );

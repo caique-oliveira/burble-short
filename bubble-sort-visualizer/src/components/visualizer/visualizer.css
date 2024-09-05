@@ -1,15 +1,93 @@
-.containerFil {
+.container {
+    position: relative;
+  }
+  
+  .controls {
+    margin-bottom: 20px;
+  }
+  
+  .range-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .range-label {
+    margin-right: 10px;
+  }
+  
+  .range-input {
+    margin: 0 10px;
+  }
+  
+  .range-value {
+    margin-left: 10px;
+  }
+  
+  .button-container {
+    margin-bottom: 20px;
+  }
+  
+  .containerFil {
     position: relative;
     margin: 0px 30px 0px 0px;
     height: 78vh;
     width: 100%;
-    transform: rotate(180deg);
   }
+  
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+  
   .element-container {
     position: relative;
     width: 100%;
     height: 100%;
   }
+  
   .element {
-    background: cornflowerblue;
+    position: absolute;
+    transition: background-color 0.5s; /* Transição suave para a cor */
   }
+  
+  /* Estiliza o input range */
+.range-input {
+    -webkit-appearance: none; /* Remove o estilo padrão do navegador */
+    width: 100%; /* Ajusta a largura do input range */
+    height: 15px; /* Altura do input range */
+    background: #ddd; /* Cor de fundo do input range */
+    outline: none; /* Remove o contorno padrão */
+    border-radius: 5px; /* Borda arredondada */
+    position: relative; /* Para posicionar o pseudo-elemento */
+  }
+  
+  /* Estilo para o indicador do slider */
+  .range-input::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Remove o estilo padrão do navegador */
+    width: 25px; /* Largura do indicador */
+    height: 25px; /* Altura do indicador */
+    background: #4CAF50; /* Cor do indicador */
+    cursor: pointer; /* Muda o cursor para pointer */
+    border-radius: 50%; /* Torna o indicador circular */
+    position: relative; /* Para posicionar o pseudo-elemento */
+    z-index: 1; /* Coloca o indicador acima do track */
+  }
+  
+  /* Estilo para o track do slider */
+  .range-input::-moz-range-track {
+    width: 100%;
+    height: 15px;
+    background: #ddd;
+    border-radius: 5px;
+  }
+  
+  /* Estilo para o thumb do slider */
+  .range-input::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #4CAF50;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  
