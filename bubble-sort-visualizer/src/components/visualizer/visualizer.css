@@ -48,7 +48,7 @@
   }
   
   .element {
-    position: absolute;
+    float: right;
     transition: background-color 0.5s; /* Transição suave para a cor */
   }
   
