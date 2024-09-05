@@ -6,6 +6,6 @@
 
 .element {
     position: absolute;
-    background: cornflowerblue; /* Cor padrão se necessário */
+    background: silver; /* Cor padrão se necessário */
     transition: background-color 0.5s; /* Transição suave para a cor */
   }

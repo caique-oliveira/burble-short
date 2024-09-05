@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
-import './Visualizer.css'; // Importando o CSS
-import ElementList from './elementList'; // Importando o novo componente
+import './Visualizer.css';
+import ElementList from './elementList';
 
 const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'cyan', 'magenta', 'lime', 'pink'];
 
@@ -21,7 +21,7 @@ const bubbleSort = async (array: number[], updateArray: (array: number[]) => voi
 
 const Visualizer: React.FC = () => {
   const [data, setData] = useState<number[]>([]);
-  const [delay, setDelay] = useState<number>(500);
+  const [delay] = useState<number>(500);
   const [size, setSize] = useState<number>(1000);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -49,14 +49,9 @@ const Visualizer: React.FC = () => {
         const height = svgRef.current.clientHeight;
         const barWidth = width / data.length;
 
-        console.log('Bar width:', barWidth);
-
         const yScale = d3.scaleLinear()
           .domain([0, d3.max(data) || 0])
           .range([height, 0]);
-
-        console.log('Y scale domain:', [0, d3.max(data) || 0]);
-        console.log('Y scale range:', [height, 0]);
 
         svg.selectAll("rect")
           .data(data)
@@ -67,8 +62,6 @@ const Visualizer: React.FC = () => {
           .attr("width", barWidth - 1)
           .attr("height", (d: number) => height - yScale(d))
           .attr("fill", "steelblue");
-
-        console.log('Rectangles drawn');
       }
     };
 
@@ -79,7 +72,6 @@ const Visualizer: React.FC = () => {
     try {
       const response = await axios.get(`/api/api/v1.0/random?min=0&max=1000&count=${size}`);
       setData(response.data);
-      console.log(response.data, 'response data');
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -89,15 +81,10 @@ const Visualizer: React.FC = () => {
     if (isPlaying || data.length === 0) return;
   
     setIsPlaying(true);
-    
-    setTimeout(() => {
-      console.log('Estado após setIsPlaying:', isPlaying);
-    }, 0);
   
     bubbleSort([...data], setData, delay).finally(() => {
       setIsPlaying(false);
     });
-    console.log([...data], 'data aqui');
 
     if (isPlaying) return;
     paintElements();
@@ -118,12 +105,11 @@ const Visualizer: React.FC = () => {
     // Resetar os dados
     await fetchData();
 
-    // Limpar as referências dos elementos e reaplicar a cor inicial
     requestAnimationFrame(() => {
       if (elementsRef.current) {
         elementsRef.current.forEach(element => {
           if (element) {
-            element.style.backgroundColor = 'cornflowerblue'; // Cor inicial
+            element.style.backgroundColor = 'silver';
           }
         });
       }
@@ -142,19 +128,6 @@ const Visualizer: React.FC = () => {
   return (
     <div className="container">
       <div className="controls">
-        <div className="range-container">
-          <label className="range-label">Delay: {delay}ms</label>
-          <input
-            type="range"
-            min="0"
-            max="1000"
-            value={delay}
-            onChange={(e) => setDelay(Number(e.target.value))}
-            disabled={isPlaying}
-            className="range-input"
-          />
-          <span className="range-value">{delay} ms</span>
-        </div>
         <div className="range-container">
           <label className="range-label">Size: {size}</label>
           <input
