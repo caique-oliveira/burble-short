@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import Element from './element';
 
 interface ElementListProps {
-  elementsRef: React.RefObject<HTMLDivElement[]>;
+  elementsRef: React.MutableRefObject<HTMLDivElement[]>; // Atualizado para MutableRefObject
   size: number; // Recebe o valor do size
 }
 
@@ -28,6 +28,7 @@ const ElementList: React.FC<ElementListProps> = ({ elementsRef, size }) => {
 
   useEffect(() => {
     if (elementsRef.current) {
+      // Atualiza a referência com as referências locais
       elementsRef.current = localRefs.current;
     }
   }, [elementsRef]);

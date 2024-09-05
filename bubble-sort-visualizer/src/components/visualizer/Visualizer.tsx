@@ -13,7 +13,7 @@ const bubbleSort = async (array: number[], updateArray: (array: number[]) => voi
       if (array[j] > array[j + 1]) {
         [array[j], array[j + 1]] = [array[j + 1], array[j]];
         updateArray([...array]);
-        await new Promise(res => setTimeout(res, delay));
+        await new Promise(res => setTimeout(res, delay)); // Usa o atraso configurado
       }
     }
   }
@@ -21,7 +21,7 @@ const bubbleSort = async (array: number[], updateArray: (array: number[]) => voi
 
 const Visualizer: React.FC = () => {
   const [data, setData] = useState<number[]>([]);
-  const [delay] = useState<number>(500);
+  const [delay, setDelay] = useState<number>(500); // Atraso inicial
   const [size, setSize] = useState<number>(1000);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -32,8 +32,8 @@ const Visualizer: React.FC = () => {
     for (let i = 0; i < elementsRef.current.length; i++) {
       const element = elementsRef.current[i];
       if (element) {
-        element.style.backgroundColor = colors[i % colors.length]; // Atribui a cor do array
-        await new Promise(res => setTimeout(res, 500)); // Aguarda 500ms entre cada alteração
+        element.style.backgroundColor = colors[i % colors.length];
+        await new Promise(res => setTimeout(res, delay)); // Usa o atraso configurado
       }
     }
     setIsPlaying(false);
@@ -79,14 +79,14 @@ const Visualizer: React.FC = () => {
 
   const startSorting = () => {
     if (isPlaying || data.length === 0) return;
-  
+
     setIsPlaying(true);
-  
+
     bubbleSort([...data], setData, delay).finally(() => {
       setIsPlaying(false);
     });
 
-    if (isPlaying) return;
+    // Chama paintElements após a ordenação começar
     paintElements();
   };
 
@@ -99,10 +99,7 @@ const Visualizer: React.FC = () => {
   const reset = async () => {
     if (isPlaying) return;
 
-    // Resetar o valor do tamanho para o valor inicial
     setSize(1000); // Valor inicial desejado
-
-    // Resetar os dados
     await fetchData();
 
     requestAnimationFrame(() => {
@@ -125,6 +122,10 @@ const Visualizer: React.FC = () => {
     setSize(newSize);
   };
 
+  const handleDelayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDelay(Number(e.target.value));
+  };
+
   return (
     <div className="container">
       <div className="controls">
@@ -132,15 +133,29 @@ const Visualizer: React.FC = () => {
           <label className="range-label">Size: {size}</label>
           <input
             type="range"
-            min="600" // Define o valor mínimo para o range
+            min="600"
             max="10000"
             step="100"
             value={size}
-            onChange={handleSizeChange} // Use o manipulador de eventos atualizado
+            onChange={handleSizeChange}
             disabled={isPlaying}
             className="range-input"
           />
           <span className="range-value">{size}</span>
+        </div>
+        <div className="range-container">
+          <label className="range-label">Delay: {delay}ms</label>
+          <input
+            type="range"
+            min="0"
+            max="1000"
+            step="10"
+            value={delay}
+            onChange={handleDelayChange}
+            disabled={isPlaying}
+            className="range-input"
+          />
+          <span className="range-value">{delay} ms</span>
         </div>
       </div>
       <div className="button-container">
